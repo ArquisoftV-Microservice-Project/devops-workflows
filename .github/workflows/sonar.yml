@@ -6,8 +6,6 @@ on:
           required: true
         SONAR_HOST:
           required: true
-        GITHUB_TOKEN:
-          required: true
     
 permissions:
   pull-requests: write
