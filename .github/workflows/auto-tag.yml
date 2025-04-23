@@ -134,12 +134,12 @@ jobs:
 
       - name: Create GitHub Release
         id: create-release
-        uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.token || github.token }}
+        uses: actions/create-release@v1
         with:
           tag_name: ${{ steps.create-tag.outputs.new_tag }}
-          release_name: ${{ inputs.release_name != '' && inputs.release_name || format('Release {0}', steps.create-tag.outputs.new_tag) | replace('{tag}', steps.create-tag.outputs.new_tag) }}
-          body: ${{ inputs.release_body != '' && inputs.release_body || format('Automatic release created from commit: {0}', steps.get-commit-message.outputs.message) | replace('{commit_message}', steps.get-commit-message.outputs.message) }}
+          release_name: ${{ format(inputs.release_name, steps.create-tag.outputs.new_tag) }}
+          body: ${{ format(inputs.release_body, steps.get-commit-message.outputs.message) }}
           draft: false
           prerelease: false
