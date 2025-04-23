@@ -22,12 +22,12 @@ on:
         description: "Formato para el nombre del release"
         required: false
         type: string
-        default: "Release {tag}"
+        default: "Release %s"
       release_body:
         description: "Formato para el cuerpo del release"
         required: false
         type: string
-        default: "Automatic release created from commit: {commit_message}"
+        default: "Automatic release created from commit: %s"
     secrets:
       token:
         description: "Token para crear el tag y release (normalmente GITHUB_TOKEN)"
@@ -52,27 +52,27 @@ jobs:
       - name: Determine version bump
         id: determine-bump
         run: |
-          COMMIT_MSG=${{ steps.get-commit-message.outputs.message }}
-          BUMP_PATTERN='${{ inputs.bump_pattern }}'
-          DEFAULT_BUMP='${{ inputs.default_bump }}'
-
+          # Obtener variables
+          COMMIT_MSG="${{ steps.get-commit-message.outputs.message }}"
+          PATTERN="${{ inputs.bump_pattern }}"
+          DEFAULT_BUMP="${{ inputs.default_bump }}"
+          
           echo "Checking commit message: $COMMIT_MSG"
-          echo "Using pattern: $BUMP_PATTERN"
-
-          if [[ $COMMIT_MSG =~ $BUMP_PATTERN ]]; then
-            if [[ $COMMIT_MSG =~ release:[ ]*major ]]; then
-              echo "bump=major" >> $GITHUB_OUTPUT
-              echo "Detected major version bump"
-            elif [[ $COMMIT_MSG =~ release:[ ]*minor ]]; then
-              echo "bump=minor" >> $GITHUB_OUTPUT
-              echo "Detected minor version bump"
-            elif [[ $COMMIT_MSG =~ release:[ ]*patch ]]; then
-              echo "bump=patch" >> $GITHUB_OUTPUT
-              echo "Detected patch version bump"
-            else
-              echo "bump=$DEFAULT_BUMP" >> $GITHUB_OUTPUT
-              echo "Using default bump: $DEFAULT_BUMP"
-            fi
+          echo "Using pattern: $PATTERN"
+          
+          # Usar un enfoque más simple basado en coincidencias de patrones básicos
+          if echo "$COMMIT_MSG" | grep -E "release:.*major" > /dev/null; then
+            echo "bump=major" >> $GITHUB_OUTPUT
+            echo "Detected major version bump"
+          elif echo "$COMMIT_MSG" | grep -E "release:.*minor" > /dev/null; then
+            echo "bump=minor" >> $GITHUB_OUTPUT
+            echo "Detected minor version bump"
+          elif echo "$COMMIT_MSG" | grep -E "release:.*patch" > /dev/null; then
+            echo "bump=patch" >> $GITHUB_OUTPUT
+            echo "Detected patch version bump"
+          elif echo "$COMMIT_MSG" | grep -E "$PATTERN" > /dev/null; then
+            echo "bump=$DEFAULT_BUMP" >> $GITHUB_OUTPUT
+            echo "Using default bump: $DEFAULT_BUMP"
           else
             echo "No release pattern found in commit message. Skipping tagging."
             exit 0
